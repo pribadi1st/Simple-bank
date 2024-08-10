@@ -6,10 +6,11 @@ import (
 	"os"
 	"testing"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 var queries *Queries
+var testDB *pgxpool.Pool
 
 const (
 	dbDriver = "postgres"
@@ -17,12 +18,20 @@ const (
 )
 
 func TestMain(m *testing.M) {
-	conn, err := pgx.Connect(context.Background(), dbSource)
+	var err error
+	// testDB, err = pgxpool.Connect(context.Background(), dbSource)
+	config, err := pgxpool.ParseConfig(dbSource)
+	if err != nil {
+		log.Fatal("cannot parse config:", err)
+	}
+
+	testDB, err = pgxpool.NewWithConfig(context.Background(), config)
 	if err != nil {
 		log.Fatal("cannot connect to db:", err)
 	}
 
-	queries = New(conn)
-
-	os.Exit(m.Run())
+	queries = New(testDB)
+	code := m.Run()
+	testDB.Close()
+	os.Exit(code)
 }

@@ -19,7 +19,7 @@ type Account struct {
 
 type Entry struct {
 	ID        int64
-	AccountID pgtype.Int8
+	AccountID int64
 	// Can be negative or positive
 	Amount    float64
 	CreatedAt pgtype.Timestamptz
